@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VoiceIQ Playground</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: light dark; --bg:#F6F4EF; --ink:#18212D; --muted:#5C6672; --gold:#E2A72E }
+  @media (prefers-color-scheme: dark) { :root { --bg:#12161C; --ink:#EEF2F6; --muted:#9AA4AF } }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--ink);
+         font:16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; padding:16px; box-sizing:border-box; text-align:center }
+  .dot { display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--gold); margin-right:8px }
+  h1 { font-size:26px; margin:0 0 8px }
+  p { color:var(--muted); margin:6px 0 }
+  a { color:var(--ink); font-weight:600 }
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="dot"></span>VoiceIQ Playground</h1>
+  <p id="msg">Opening the playground…</p>
+  <p id="alt" hidden></p>
+</main>
+<script>
+// This page never changes address. It reads the playground's current link from link.txt (updated automatically
+// whenever the playground gets a new link) and goes there.
+(async () => {
+  const show = (m, link) => {
+    document.getElementById("msg").textContent = m;
+    if (link) { const a = document.getElementById("alt"); a.hidden = false; a.innerHTML = `<a href="${link}">Tap here if it doesn't open</a>`; }
+  };
+  try {
+    const r = await fetch("link.txt?t=" + Date.now(), { cache: "no-store" });
+    const link = (await r.text()).trim();
+    if (!/^https:\/\/[a-z0-9.-]+\.(trycloudflare\.com|[a-z]{2,})\/?$/i.test(link)) throw new Error("no link");
+    const target = link.replace(/\/$/, "") + "/" + location.search + location.hash;   // keeps ?checker=... for language checkers
+    show("Opening the playground…", target);
+    location.replace(target);
+  } catch (e) {
+    show("The playground is restarting. Please try again in a minute.");
+  }
+})();
+</script>
+</body>
+</html>
